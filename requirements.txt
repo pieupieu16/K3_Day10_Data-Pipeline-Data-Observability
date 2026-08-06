@@ -1,3 +1,4 @@
+beautifulsoup4>=4.12.3
 chromadb>=1.0.12
 datasets>=4.0.0
 great-expectations>=1.16.1
