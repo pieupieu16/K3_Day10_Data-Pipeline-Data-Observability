@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import random
 
@@ -27,13 +27,15 @@ def _target_count(row_count: int, fraction: float = 0.15) -> int:
 
 
 def _embedding_text(row: pd.Series) -> str:
-    parts = (
-        f"Title: {normalize_whitespace(str(row.get('title', '')))}",
-        f"Summary: {normalize_whitespace(str(row.get('summary', '')))}",
-        f"Authors: {normalize_whitespace(str(row.get('authors_joined', '')))}",
-        f"Categories: {normalize_whitespace(str(row.get('categories_joined', '')))}",
+    # Keep the exact clean-data contract so untouched rows remain byte-for-byte
+    # comparable with the baseline after text_for_embedding is rebuilt.
+    return normalize_whitespace(
+        f"Title: {row.get('title', '')}\n"
+        f"Authors: {row.get('authors_joined', '')}\n"
+        f"Categories: {row.get('categories_joined', '')}\n"
+        f"Published: {row.get('published', '')}\n"
+        f"Summary: {row.get('summary', '')}"
     )
-    return "\n".join(parts)
 
 
 def _pick_indices(indices: list[int], count: int, rng: random.Random, offset: int) -> list[int]:
@@ -123,7 +125,7 @@ def corrupt_clean_dataframe(df: pd.DataFrame, output_log_path: Path) -> pd.DataF
 
     stale_indices = _pick_indices(indices, mutation_count, rng, offset=mutation_count * 3)
     stale_ids = corrupted.loc[stale_indices, "paper_id"].astype(str).tolist()
-    stale_date = (datetime.now(UTC).date() - timedelta(days=3650)).isoformat()
+    stale_date = (datetime.now(timezone.utc).date() - timedelta(days=3650)).isoformat()
     corrupted.loc[stale_indices, "published"] = stale_date
     if "age_days" in corrupted.columns:
         corrupted.loc[stale_indices, "age_days"] = 3650

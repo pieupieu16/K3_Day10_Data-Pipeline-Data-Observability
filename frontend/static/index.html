@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 10 - Data Pipeline &amp; Observability Console</title>
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+<div class="window">
+  <!-- ===================== Title bar ===================== -->
+  <div class="title-bar">
+    <div class="icon">DP</div>
+    <div class="title">Day 10 - Data Pipeline &amp; Observability Console</div>
+    <div class="btns">
+      <div class="title-btn" title="Minimize">_</div>
+      <div class="title-btn" title="Maximize">&#9633;</div>
+      <div class="title-btn" title="Close" onclick="App.dlg('Thoat', 'Dong tab trinh duyet de thoat. Server van chay trong terminal (Ctrl+C de dung).')">&times;</div>
+    </div>
+  </div>
+
+  <!-- ===================== Menu strip ===================== -->
+  <div class="menu-strip" id="menuStrip">
+    <div class="menu-item" data-menu><u>F</u>ile
+      <div class="menu-popup">
+        <div onclick="App.refreshAll()">Lam moi tat ca<span class="key">F5</span></div>
+        <div onclick="App.openTab('reports')">Mo bao cao...</div>
+        <hr>
+        <div onclick="App.dlg('Thoat', 'Dong tab trinh duyet de thoat. Server van chay trong terminal (Ctrl+C de dung).')">Thoat</div>
+      </div>
+    </div>
+    <div class="menu-item" data-menu><u>P</u>ipeline
+      <div class="menu-popup">
+        <div onclick="App.run('phase1')">Chay Phase 1 - Baseline<span class="key">F9</span></div>
+        <div onclick="App.run('corruption')">Chay Corruption Flow<span class="key">F10</span></div>
+        <hr>
+        <div onclick="App.stop()">Dung pipeline<span class="key">Shift+F5</span></div>
+        <div onclick="App.clearLog()">Xoa console log</div>
+      </div>
+    </div>
+    <div class="menu-item" data-menu><u>V</u>iew
+      <div class="menu-popup">
+        <div onclick="App.openTab('dashboard')">Dashboard<span class="key">Ctrl+1</span></div>
+        <div onclick="App.openTab('data')">Data Explorer<span class="key">Ctrl+2</span></div>
+        <div onclick="App.openTab('quality')">Data Quality<span class="key">Ctrl+3</span></div>
+        <div onclick="App.openTab('metrics')">Metrics<span class="key">Ctrl+4</span></div>
+        <div onclick="App.openTab('eval')">Evaluation<span class="key">Ctrl+5</span></div>
+        <div onclick="App.openTab('reports')">Reports<span class="key">Ctrl+6</span></div>
+        <div onclick="App.openTab('console')">Console<span class="key">Ctrl+7</span></div>
+      </div>
+    </div>
+    <div class="menu-item" data-menu><u>T</u>eam
+      <div class="menu-popup">
+        <div onclick="App.dlg('Phan cong', App.teamText())">Bang phan cong nhom</div>
+        <div onclick="App.openTab('dashboard')">Trang thai artifact theo nguoi</div>
+      </div>
+    </div>
+    <div class="menu-item" data-menu><u>H</u>elp
+      <div class="menu-popup">
+        <div onclick="App.dlg('Huong dan nhanh', App.helpText())">Huong dan nhanh<span class="key">F1</span></div>
+        <div onclick="App.dlg('About', 'Day 10 - Data Pipeline &amp; Data Observability\nConsole frontend v1.0\nGiao dien mo phong Windows Forms.\nBackend: Python stdlib http.server.')">About...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== Tool strip ===================== -->
+  <div class="tool-strip">
+    <button id="btnPhase1" onclick="App.run('phase1')">&#9654; Run Phase 1</button>
+    <button id="btnCorrupt" onclick="App.run('corruption')">&#9654; Run Corruption Flow</button>
+    <button id="btnStop" onclick="App.stop()" disabled>&#9632; Stop</button>
+    <div class="sep"></div>
+    <button onclick="App.refreshAll()">&#8635; Refresh</button>
+    <div class="sep"></div>
+    <span class="muted">Trang thai:</span>
+    <span id="runState"><span class="led off"></span>Idle</span>
+    <div class="spacer"></div>
+    <span class="muted" id="artifactCount">Artifact 0/0</span>
+    <div class="progress" style="width:140px" id="artifactBar"></div>
+  </div>
+
+  <!-- ===================== Tabs ===================== -->
+  <div class="tab-control">
+    <div class="tab-strip" id="tabStrip">
+      <div class="tab active" data-tab="dashboard">Dashboard</div>
+      <div class="tab" data-tab="data">Data Explorer</div>
+      <div class="tab" data-tab="quality">Data Quality</div>
+      <div class="tab" data-tab="metrics">Metrics</div>
+      <div class="tab" data-tab="eval">Evaluation</div>
+      <div class="tab" data-tab="reports">Reports</div>
+      <div class="tab" data-tab="console">Console</div>
+      <div class="tab" data-tab="config">Config</div>
+    </div>
+
+    <div class="tab-body">
+
+      <!-- ---------- Dashboard ---------- -->
+      <section class="page active" id="page-dashboard">
+        <div class="group">
+          <div class="legend">Luong pipeline</div>
+          <div id="flowDiagram" class="row tight mono" style="line-height:1.9"></div>
+        </div>
+
+        <div class="group">
+          <div class="legend">Chi so chinh (baseline / corrupted / repaired)</div>
+          <div class="tiles" id="dashTiles"><span class="muted">Chua co metrics.</span></div>
+        </div>
+
+        <div class="group">
+          <div class="legend">Trang thai artifact</div>
+          <div class="listview" style="max-height:calc(100vh - 460px);min-height:220px">
+            <table class="lv" id="artifactTable">
+              <thead><tr><th style="width:120px">Buoc</th><th>File</th><th style="width:90px">Nguoi lam</th><th style="width:80px">Trang thai</th><th class="num" style="width:90px">Kich thuoc</th><th style="width:150px">Cap nhat</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- Data Explorer ---------- -->
+      <section class="page" id="page-data">
+        <div class="row" style="margin-bottom:8px">
+          <label>Dataset:</label>
+          <select id="datasetSelect" onchange="App.loadDataset()">
+            <option value="clean">papers_clean.csv (baseline)</option>
+            <option value="corrupted">papers_clean_corrupted.csv</option>
+            <option value="repaired">papers_clean_repaired.csv</option>
+          </select>
+          <label>So dong:</label>
+          <select id="datasetLimit" onchange="App.loadDataset()">
+            <option>50</option><option selected>100</option><option>300</option><option>1000</option>
+          </select>
+          <label>Loc:</label>
+          <input type="search" id="datasetFilter" placeholder="tim trong bang..." oninput="App.renderDatasetRows()" style="width:200px">
+          <div class="spacer"></div>
+          <span class="muted" id="datasetInfo"></span>
+        </div>
+        <div class="split-v" style="height:calc(100% - 34px);gap:16px">
+          <div class="fill">
+            <div class="listview">
+              <table class="lv" id="datasetTable"><thead><tr></tr></thead><tbody></tbody></table>
+            </div>
+          </div>
+          <div class="group fill" style="margin-top:4px">
+            <div class="legend">Chi tiet ban ghi</div>
+            <div class="listview" style="flex:1">
+              <table class="lv" id="recordTable"><tbody><tr><td class="muted">Chon mot dong o bang tren.</td></tr></tbody></table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- Data Quality ---------- -->
+      <section class="page" id="page-quality">
+        <div class="group">
+          <div class="legend">Freshness</div>
+          <div class="tiles" id="freshTiles"><span class="muted">Chua co freshness_report.json.</span></div>
+        </div>
+        <div class="group">
+          <div class="legend">Data quality checks</div>
+          <div class="listview" style="max-height:260px">
+            <table class="lv" id="qualityTable">
+              <thead><tr><th style="width:200px">File</th><th style="width:220px">Check</th><th style="width:80px">Ket qua</th><th>Chi tiet</th></tr></thead>
+              <tbody><tr><td colspan="4" class="muted">Chua co file nao trong data/quality/.</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="group">
+          <div class="legend">Corruption log</div>
+          <div class="listview" style="max-height:240px">
+            <table class="lv" id="corruptionTable">
+              <thead><tr><th style="width:240px">Loai loi</th><th>Noi dung</th></tr></thead>
+              <tbody><tr><td colspan="2" class="muted">Chua co corruption_log.json.</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- Metrics ---------- -->
+      <section class="page" id="page-metrics">
+        <div class="group">
+          <div class="legend">So sanh ba trang thai</div>
+          <div class="listview">
+            <table class="lv" id="metricsTable">
+              <thead><tr>
+                <th style="width:200px">Metric</th>
+                <th class="num" style="width:120px">Baseline</th>
+                <th class="num" style="width:120px">Corrupted</th>
+                <th class="num" style="width:120px">Repaired</th>
+                <th class="num" style="width:140px">&Delta; Corrupted</th>
+                <th class="num" style="width:140px">&Delta; Repaired</th>
+              </tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="group">
+          <div class="legend">Bieu do (retrieval_hit_rate / judge_accuracy / mean_token_f1)</div>
+          <div id="metricChart" class="mono" style="line-height:1.6"></div>
+        </div>
+        <div class="group">
+          <div class="legend">Ragas / ghi chu</div>
+          <pre class="mono" id="ragasBox" style="margin:0;white-space:pre-wrap">Chua co du lieu.</pre>
+        </div>
+      </section>
+
+      <!-- ---------- Evaluation ---------- -->
+      <section class="page" id="page-eval">
+        <div class="row" style="margin-bottom:8px">
+          <label>Nguon:</label>
+          <select id="answerState" onchange="App.loadAnswers()">
+            <option value="testset">test_set.json (cau hoi goc)</option>
+            <option value="baseline">baseline_answers.json</option>
+            <option value="corrupted">corrupted_answers.json</option>
+            <option value="repaired">repaired_answers.json</option>
+            <option value="demo">agent_demo_answers.json</option>
+          </select>
+          <div class="spacer"></div>
+          <span class="muted" id="answerInfo"></span>
+        </div>
+        <div class="split" style="height:calc(100% - 34px)">
+          <div class="fill">
+            <div class="listview">
+              <table class="lv" id="answerTable">
+                <thead><tr><th style="width:60px">ID</th><th style="width:90px">Loai</th><th>Cau hoi</th><th style="width:50px">Hit</th></tr></thead>
+                <tbody><tr><td colspan="4" class="muted">Chua co du lieu.</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="group fill" style="margin-top:10px">
+            <div class="legend">Chi tiet</div>
+            <div class="listview" style="flex:1">
+              <table class="lv" id="answerDetail"><tbody><tr><td class="muted">Chon mot cau hoi.</td></tr></tbody></table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- Reports ---------- -->
+      <section class="page" id="page-reports">
+        <div class="row" style="margin-bottom:8px">
+          <label>Bao cao:</label>
+          <select id="reportSelect" onchange="App.loadReport()">
+            <option value="phase1">data/reports/phase1_report.md</option>
+            <option value="corruption">data/reports/corruption_report.md</option>
+          </select>
+          <button onclick="App.loadReport()">Tai lai</button>
+          <div class="spacer"></div>
+          <span class="muted" id="reportInfo"></span>
+        </div>
+        <div class="fill" style="height:calc(100% - 34px)">
+          <div class="md" id="reportView"><p class="muted">Chua co bao cao.</p></div>
+        </div>
+      </section>
+
+      <!-- ---------- Console ---------- -->
+      <section class="page" id="page-console">
+        <div class="row" style="margin-bottom:8px">
+          <button onclick="App.run('phase1')">Run Phase 1</button>
+          <button onclick="App.run('corruption')">Run Corruption Flow</button>
+          <button onclick="App.stop()">Stop</button>
+          <button onclick="App.clearLog()">Clear</button>
+          <label class="row tight"><input type="checkbox" id="autoScroll" checked> Auto-scroll</label>
+          <div class="spacer"></div>
+          <span class="muted" id="consoleInfo">Chua chay lan nao.</span>
+        </div>
+        <div class="fill" style="height:calc(100% - 34px)">
+          <div class="console" id="consoleView" data-placeholder="1">Nhan "Run Phase 1" de chay pipeline baseline.
+Log stdout/stderr cua tien trinh se hien o day.</div>
+        </div>
+      </section>
+
+      <!-- ---------- Config ---------- -->
+      <section class="page" id="page-config">
+        <div class="group">
+          <div class="legend">Moi truong</div>
+          <div class="listview" style="max-height:300px">
+            <table class="lv" id="configTable"><tbody></tbody></table>
+          </div>
+        </div>
+        <div class="group">
+          <div class="legend">Phan cong nhom</div>
+          <div class="listview">
+            <table class="lv">
+              <thead><tr><th style="width:100px">Thanh vien</th><th style="width:280px">File phu trach</th><th>Nhiem vu chinh</th></tr></thead>
+              <tbody>
+                <tr><td>Quan</td><td class="mono">src/ingestion/crossref.py</td><td>Goi Crossref API, retry, parse PaperRecord, luu raw</td></tr>
+                <tr><td>Quan</td><td class="mono">src/ingestion/cleaning.py, src/evaluation/testset.py</td><td>Chuan hoa du lieu, bo duplicate, tao age_days va test set</td></tr>
+                <tr><td>Long</td><td class="mono">src/observability/quality.py, reporting.py</td><td>Quality checks, freshness report, bao cao baseline &amp; so sanh</td></tr>
+                <tr><td>Phuong</td><td class="mono">src/ingestion/corruption.py</td><td>Tao du lieu loi co chu dinh, repair tu raw, corruption log</td></tr>
+                <tr><td>Tung</td><td class="mono">src/pipelines/phase1.py, corruption_flow.py</td><td>Ghep pipeline, embedding + ChromaDB, RAG evaluation, metrics</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- ===================== Status bar ===================== -->
+  <div class="status-bar">
+    <div class="status-cell grow" id="statusText">San sang</div>
+    <div class="status-cell" id="statusPipeline">Pipeline: idle</div>
+    <div class="status-cell" id="statusArtifacts">Artifacts: -/-</div>
+    <div class="status-cell" id="statusClock">--:--:--</div>
+  </div>
+</div>
+
+<!-- ===================== Message box ===================== -->
+<div class="modal-backdrop" id="modal">
+  <div class="dialog">
+    <div class="title-bar"><div class="title" id="modalTitle">Thong bao</div>
+      <div class="btns"><div class="title-btn" onclick="App.closeDlg()">&times;</div></div>
+    </div>
+    <div class="body"><div class="ico">&#8505;</div><div id="modalBody" style="white-space:pre-wrap"></div></div>
+    <div class="foot"><button onclick="App.closeDlg()">OK</button></div>
+  </div>
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
