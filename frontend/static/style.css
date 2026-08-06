@@ -1,0 +1,458 @@
+/* ================================================================
+   Windows Forms / Win32 classic theme
+   ================================================================ */
+:root {
+  --control: #d4d0c8;
+  --control-light: #ffffff;
+  --control-dark: #808080;
+  --control-darker: #404040;
+  --desktop: #3a6ea5;
+  --text: #000000;
+  --text-dim: #6d6d6d;
+  --field: #ffffff;
+  --caption-a: #0a246a;
+  --caption-b: #a6caf0;
+  --caption-inactive: #808080;
+  --highlight: #0a246a;
+  --ok: #008000;
+  --warn: #806000;
+  --err: #a00000;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  background: var(--desktop);
+  font-family: "MS Sans Serif", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 12px;
+  color: var(--text);
+  overflow: hidden;
+}
+
+/* ---------- 3D bevels ------------------------------------------------ */
+.raised {
+  border: 1px solid var(--control-darker);
+  border-top-color: var(--control-light);
+  border-left-color: var(--control-light);
+  box-shadow: inset 1px 1px 0 var(--control), inset -1px -1px 0 var(--control-dark);
+}
+.sunken {
+  border: 1px solid var(--control-dark);
+  border-right-color: var(--control-light);
+  border-bottom-color: var(--control-light);
+  box-shadow: inset 1px 1px 0 var(--control-darker), inset -1px -1px 0 var(--control);
+}
+
+/* ---------- Window --------------------------------------------------- */
+.window {
+  position: absolute;
+  inset: 8px;
+  display: flex;
+  flex-direction: column;
+  background: var(--control);
+  border: 1px solid var(--control-darker);
+  border-top-color: var(--control-light);
+  border-left-color: var(--control-light);
+  box-shadow: inset 1px 1px 0 var(--control), inset -1px -1px 0 var(--control-dark), 2px 2px 6px rgba(0,0,0,.4);
+  padding: 2px;
+}
+
+.title-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 2px 0 3px;
+  background: linear-gradient(90deg, var(--caption-a), var(--caption-b));
+  color: #fff;
+  font-weight: bold;
+  user-select: none;
+}
+.title-bar .icon {
+  width: 16px; height: 16px;
+  display: grid; place-items: center;
+  background: var(--control);
+  color: #000;
+  font-size: 10px;
+  border: 1px solid var(--control-dark);
+}
+.title-bar .title { flex: 1; letter-spacing: .2px; }
+.title-bar .btns { display: flex; gap: 2px; }
+.title-btn {
+  width: 18px; height: 16px;
+  background: var(--control);
+  border: 1px solid var(--control-darker);
+  border-top-color: var(--control-light);
+  border-left-color: var(--control-light);
+  box-shadow: inset 1px 1px 0 var(--control-light), inset -1px -1px 0 var(--control-dark);
+  color: #000;
+  font-size: 10px;
+  font-weight: bold;
+  line-height: 12px;
+  display: grid; place-items: center;
+  cursor: default;
+  font-family: "Marlett", "Segoe UI", sans-serif;
+}
+.title-btn:active { box-shadow: inset 1px 1px 0 var(--control-dark); }
+
+/* ---------- Menu strip ----------------------------------------------- */
+.menu-strip {
+  display: flex;
+  gap: 0;
+  padding: 1px 2px;
+  background: var(--control);
+  border-bottom: 1px solid var(--control-dark);
+  user-select: none;
+}
+.menu-item {
+  padding: 2px 8px;
+  cursor: default;
+  position: relative;
+}
+.menu-item:hover, .menu-item.open { background: var(--highlight); color: #fff; }
+.menu-item u { text-decoration: underline; }
+.menu-popup {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 210px;
+  background: var(--control);
+  color: #000;
+  border: 1px solid var(--control-darker);
+  border-top-color: var(--control-light);
+  border-left-color: var(--control-light);
+  box-shadow: 2px 2px 4px rgba(0,0,0,.35);
+  padding: 2px;
+  z-index: 60;
+}
+.menu-item.open .menu-popup { display: block; }
+.menu-popup div {
+  padding: 3px 20px 3px 22px;
+  white-space: nowrap;
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+}
+.menu-popup div:hover { background: var(--highlight); color: #fff; }
+.menu-popup div.disabled { color: var(--control-dark); }
+.menu-popup div.disabled:hover { background: transparent; color: var(--control-dark); }
+.menu-popup hr { border: none; border-top: 1px solid var(--control-dark); border-bottom: 1px solid var(--control-light); margin: 3px 2px; }
+.menu-popup span.key { color: var(--text-dim); }
+.menu-popup div:hover span.key { color: #dcdcdc; }
+
+/* ---------- Tool strip ------------------------------------------------ */
+.tool-strip {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 4px;
+  background: var(--control);
+  border-bottom: 1px solid var(--control-dark);
+  box-shadow: 0 1px 0 var(--control-light);
+}
+.sep { width: 2px; height: 20px; margin: 0 3px; border-left: 1px solid var(--control-dark); border-right: 1px solid var(--control-light); }
+
+button, .btn {
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--text);
+  background: var(--control);
+  border: 1px solid var(--control-darker);
+  border-top-color: var(--control-light);
+  border-left-color: var(--control-light);
+  box-shadow: inset 1px 1px 0 var(--control-light), inset -1px -1px 0 var(--control-dark);
+  padding: 3px 10px;
+  min-width: 24px;
+  cursor: default;
+}
+button:active:not(:disabled) {
+  border-color: var(--control-light);
+  border-top-color: var(--control-darker);
+  border-left-color: var(--control-darker);
+  box-shadow: inset 1px 1px 0 var(--control-dark);
+  padding: 4px 9px 2px 11px;
+}
+button:disabled { color: var(--control-dark); text-shadow: 1px 1px 0 var(--control-light); }
+button:focus-visible { outline: 1px dotted #000; outline-offset: -4px; }
+
+select, input[type="text"], input[type="search"] {
+  font-family: inherit;
+  font-size: 12px;
+  background: var(--field);
+  border: 1px solid var(--control-dark);
+  border-right-color: var(--control-light);
+  border-bottom-color: var(--control-light);
+  box-shadow: inset 1px 1px 0 var(--control-darker);
+  padding: 2px 3px;
+}
+label { user-select: none; }
+
+/* ---------- Tabs ------------------------------------------------------ */
+.tab-control {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin: 4px;
+  min-height: 0;
+}
+.tab-strip {
+  display: flex;
+  gap: 2px;
+  padding-left: 2px;
+  position: relative;
+  z-index: 2;
+}
+.tab {
+  padding: 3px 12px 4px;
+  background: var(--control);
+  border: 1px solid var(--control-darker);
+  border-bottom: none;
+  border-top-color: var(--control-light);
+  border-left-color: var(--control-light);
+  box-shadow: inset 1px 1px 0 var(--control-light);
+  border-radius: 3px 3px 0 0;
+  cursor: default;
+  user-select: none;
+  margin-top: 2px;
+}
+.tab.active {
+  margin-top: 0;
+  padding: 4px 14px 5px;
+  font-weight: bold;
+  z-index: 3;
+}
+.tab-body {
+  flex: 1;
+  min-height: 0;
+  padding: 8px;
+  background: var(--control);
+  border: 1px solid var(--control-darker);
+  border-top-color: var(--control-light);
+  border-left-color: var(--control-light);
+  box-shadow: inset 1px 1px 0 var(--control-light), inset -1px -1px 0 var(--control-dark);
+  overflow: auto;
+}
+.page { display: none; height: 100%; }
+.page.active { display: block; }
+
+/* ---------- GroupBox --------------------------------------------------- */
+.group {
+  position: relative;
+  border: 1px solid var(--control-dark);
+  border-right-color: var(--control-light);
+  border-bottom-color: var(--control-light);
+  box-shadow: inset 1px 1px 0 var(--control-light), 1px 1px 0 var(--control-light);
+  padding: 12px 10px 10px;
+  margin: 12px 0 0;
+}
+.group > legend, .group > .legend {
+  position: absolute;
+  top: -8px;
+  left: 8px;
+  padding: 0 4px;
+  background: var(--control);
+  font-weight: bold;
+}
+.group:first-child { margin-top: 8px; }
+
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.row.tight { gap: 4px; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; }
+.spacer { flex: 1; }
+.muted { color: var(--text-dim); }
+.mono { font-family: "Lucida Console", "Consolas", monospace; font-size: 11px; }
+
+/* ---------- ListView / DataGridView ------------------------------------ */
+.listview {
+  background: var(--field);
+  border: 1px solid var(--control-dark);
+  border-right-color: var(--control-light);
+  border-bottom-color: var(--control-light);
+  box-shadow: inset 1px 1px 0 var(--control-darker);
+  overflow: auto;
+  max-height: 100%;
+}
+table.lv {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  font-size: 11.5px;
+  background: var(--field);
+}
+table.lv th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  text-align: left;
+  font-weight: normal;
+  padding: 3px 6px;
+  background: var(--control);
+  border-right: 1px solid var(--control-dark);
+  border-bottom: 1px solid var(--control-dark);
+  box-shadow: inset 1px 1px 0 var(--control-light);
+  white-space: nowrap;
+}
+table.lv td {
+  padding: 2px 6px;
+  border-bottom: 1px solid #ececec;
+  max-width: 420px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+table.lv tbody tr:hover { background: #eef3fb; }
+table.lv tbody tr.selected { background: var(--highlight); color: #fff; }
+table.lv tbody tr.selected td { border-bottom-color: var(--highlight); }
+td.num, th.num { text-align: right; font-family: "Lucida Console", Consolas, monospace; }
+
+/* ---------- Status / badges -------------------------------------------- */
+.badge {
+  display: inline-block;
+  min-width: 60px;
+  text-align: center;
+  padding: 1px 6px;
+  font-size: 11px;
+  border: 1px solid var(--control-dark);
+  background: var(--control);
+}
+.badge.ok { color: var(--ok); font-weight: bold; }
+.badge.miss { color: var(--err); }
+.led { display: inline-block; width: 9px; height: 9px; border: 1px solid var(--control-darker); margin-right: 5px; vertical-align: -1px; }
+.led.on { background: #00d000; }
+.led.off { background: #b0b0b0; }
+.led.bad { background: #e00000; }
+
+/* ---------- Tiles (metric cards) ---------------------------------------- */
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+.tile {
+  background: var(--control);
+  border: 1px solid var(--control-dark);
+  border-top-color: var(--control-light);
+  border-left-color: var(--control-light);
+  box-shadow: inset 1px 1px 0 var(--control-light), inset -1px -1px 0 var(--control-dark);
+  padding: 6px 8px;
+}
+.tile .k { font-size: 11px; color: var(--text-dim); }
+.tile .v { font-size: 19px; font-family: "Lucida Console", Consolas, monospace; }
+.delta.up { color: var(--ok); }
+.delta.down { color: var(--err); }
+.delta.flat { color: var(--text-dim); }
+
+/* ---------- ProgressBar -------------------------------------------------- */
+.progress {
+  height: 16px;
+  background: var(--field);
+  border: 1px solid var(--control-dark);
+  border-right-color: var(--control-light);
+  border-bottom-color: var(--control-light);
+  box-shadow: inset 1px 1px 0 var(--control-darker);
+  padding: 2px;
+  display: flex;
+  gap: 2px;
+  overflow: hidden;
+}
+.progress i { width: 8px; background: #0a246a; flex: 0 0 auto; }
+
+/* ---------- Console ------------------------------------------------------ */
+.console {
+  height: 100%;
+  min-height: 240px;
+  background: #000;
+  color: #c0c0c0;
+  font-family: "Lucida Console", Consolas, monospace;
+  font-size: 11.5px;
+  line-height: 1.35;
+  padding: 6px 8px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  border: 1px solid var(--control-dark);
+  border-right-color: var(--control-light);
+  border-bottom-color: var(--control-light);
+  box-shadow: inset 1px 1px 0 var(--control-darker);
+}
+.console .err { color: #ff6b6b; }
+.console .ok { color: #74e474; }
+.console .cmd { color: #ffff80; }
+
+/* ---------- Markdown viewer ---------------------------------------------- */
+.md {
+  background: var(--field);
+  border: 1px solid var(--control-dark);
+  border-right-color: var(--control-light);
+  border-bottom-color: var(--control-light);
+  box-shadow: inset 1px 1px 0 var(--control-darker);
+  padding: 12px 16px;
+  overflow: auto;
+  height: 100%;
+}
+.md h1 { font-size: 17px; border-bottom: 1px solid #c0c0c0; padding-bottom: 3px; }
+.md h2 { font-size: 14px; margin-top: 16px; }
+.md h3 { font-size: 12.5px; margin-top: 12px; }
+.md p, .md li { line-height: 1.5; }
+.md code { font-family: "Lucida Console", Consolas, monospace; background: #f0f0f0; padding: 0 3px; }
+.md pre { background: #f0f0f0; border: 1px solid #c0c0c0; padding: 8px; overflow: auto; }
+.md table { border-collapse: collapse; margin: 8px 0; }
+.md th, .md td { border: 1px solid #a0a0a0; padding: 3px 8px; text-align: left; }
+.md th { background: var(--control); }
+
+/* ---------- Status bar ---------------------------------------------------- */
+.status-bar {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  background: var(--control);
+  border-top: 1px solid var(--control-light);
+}
+.status-cell {
+  padding: 2px 8px;
+  border: 1px solid var(--control-dark);
+  border-right-color: var(--control-light);
+  border-bottom-color: var(--control-light);
+  box-shadow: inset 1px 1px 0 var(--control-darker);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.status-cell.grow { flex: 1; }
+
+/* ---------- Splitter layout ------------------------------------------------ */
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; height: 100%; min-height: 0; }
+.split-v { display: grid; grid-template-rows: 1fr 1fr; gap: 8px; height: 100%; min-height: 0; }
+.fill { height: 100%; min-height: 0; display: flex; flex-direction: column; }
+.fill > .listview, .fill > .console, .fill > .md { flex: 1; min-height: 0; }
+
+/* ---------- Modal dialog ----------------------------------------------------- */
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.25);
+  display: none;
+  place-items: center;
+  z-index: 100;
+}
+.modal-backdrop.show { display: grid; }
+.dialog {
+  min-width: 340px;
+  max-width: 560px;
+  background: var(--control);
+  border: 1px solid var(--control-darker);
+  border-top-color: var(--control-light);
+  border-left-color: var(--control-light);
+  box-shadow: inset 1px 1px 0 var(--control), 3px 3px 8px rgba(0,0,0,.4);
+  padding: 2px;
+}
+.dialog .body { padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start; }
+.dialog .body .ico { font-size: 26px; }
+.dialog .foot { display: flex; justify-content: center; gap: 8px; padding: 0 12px 12px; }
+.dialog .foot button { min-width: 82px; }
+
+::-webkit-scrollbar { width: 16px; height: 16px; background: #e8e8e8; }
+::-webkit-scrollbar-thumb {
+  background: var(--control);
+  border: 1px solid var(--control-darker);
+  box-shadow: inset 1px 1px 0 var(--control-light), inset -1px -1px 0 var(--control-dark);
+}
+::-webkit-scrollbar-corner { background: var(--control); }

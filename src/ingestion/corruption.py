@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import random
 
@@ -123,7 +123,7 @@ def corrupt_clean_dataframe(df: pd.DataFrame, output_log_path: Path) -> pd.DataF
 
     stale_indices = _pick_indices(indices, mutation_count, rng, offset=mutation_count * 3)
     stale_ids = corrupted.loc[stale_indices, "paper_id"].astype(str).tolist()
-    stale_date = (datetime.now(UTC).date() - timedelta(days=3650)).isoformat()
+    stale_date = (datetime.now(timezone.utc).date() - timedelta(days=3650)).isoformat()
     corrupted.loc[stale_indices, "published"] = stale_date
     if "age_days" in corrupted.columns:
         corrupted.loc[stale_indices, "age_days"] = 3650
