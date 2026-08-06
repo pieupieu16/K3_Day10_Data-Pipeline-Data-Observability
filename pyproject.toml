@@ -5,6 +5,7 @@ description = "Student starter lab for Day 10 data pipeline, data observability,
 readme = "README.md"
 requires-python = ">=3.11,<3.14"
 dependencies = [
+  "beautifulsoup4>=4.12.3",
   "chromadb>=1.0.12",
   "datasets>=4.0.0",
   "great-expectations>=1.16.1",
