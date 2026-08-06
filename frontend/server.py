@@ -34,9 +34,9 @@ def _p(*parts: str) -> Path:
 ARTIFACTS: list[tuple[str, str, str, Path, str]] = [
     ("1. Ingestion", "raw_response", "crossref_response.json", _p("raw", "crossref_response.json"), "Quan"),
     ("1. Ingestion", "raw_records", "crossref_records.json", _p("raw", "crossref_records.json"), "Quan"),
-    ("2. Cleaning", "clean_csv", "papers_clean.csv", _p("clean", "papers_clean.csv"), "Quan"),
-    ("2. Cleaning", "clean_json", "papers_clean.json", _p("clean", "papers_clean.json"), "Quan"),
-    ("3. Evaluation set", "test_set", "test_set.json", _p("eval", "test_set.json"), "Quan"),
+    ("2. Cleaning", "clean_csv", "papers_clean.csv", _p("clean", "papers_clean.csv"), "Duong"),
+    ("2. Cleaning", "clean_json", "papers_clean.json", _p("clean", "papers_clean.json"), "Duong"),
+    ("3. Evaluation set", "test_set", "test_set.json", _p("eval", "test_set.json"), "Duong"),
     ("4. Embedding", "embeddings", "papers_embeddings.json", _p("embeddings", "papers_embeddings.json"), "Tung"),
     ("5. Quality", "freshness", "freshness_report.json", _p("quality", "freshness_report.json"), "Long"),
     ("5. Quality", "phase1_report", "phase1_report.md", _p("reports", "phase1_report.md"), "Long"),
