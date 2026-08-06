@@ -1,0 +1,24 @@
+{
+  "report_name": "corrupted_quality",
+  "total_rows": 22,
+  "success": false,
+  "checks": {
+    "row_count_valid": true,
+    "required_columns_present": true,
+    "paper_id_not_null": true,
+    "paper_id_unique": false,
+    "title_not_null": true,
+    "summary_valid": false,
+    "embedding_text_valid": true,
+    "age_days_valid": true
+  },
+  "statistics": {
+    "missing_paper_ids": 0,
+    "duplicate_paper_ids": 2,
+    "empty_titles": 0,
+    "invalid_summaries": 3,
+    "empty_embedding_texts": 0,
+    "stale_rows": 4,
+    "stale_ratio": 0.18181818181818182
+  }
+}
