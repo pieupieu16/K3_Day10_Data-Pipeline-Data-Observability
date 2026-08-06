@@ -1,0 +1,24 @@
+{
+  "report_name": "task3_bad_quality",
+  "total_rows": 3,
+  "success": false,
+  "checks": {
+    "row_count_valid": true,
+    "required_columns_present": true,
+    "paper_id_not_null": false,
+    "paper_id_unique": false,
+    "title_not_null": false,
+    "summary_valid": false,
+    "embedding_text_valid": false,
+    "age_days_valid": false
+  },
+  "statistics": {
+    "missing_paper_ids": 1,
+    "duplicate_paper_ids": 1,
+    "empty_titles": 1,
+    "invalid_summaries": 2,
+    "empty_embedding_texts": 2,
+    "stale_rows": 1,
+    "stale_ratio": 0.3333333333333333
+  }
+}
