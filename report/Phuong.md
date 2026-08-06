@@ -4,11 +4,11 @@
 
 | Thông tin | Nội dung |
 | --- | --- |
-| Họ và tên | Trần Hải Quân |
-| MSSV | 2A20260152 |
+| Họ và tên | Nguyễn Minh Phương |
+| MSSV | 2A202601947 |
 | Khóa/Lớp | K3 |
 | Tên nhóm | Nhóm 1 |
-| Vai trò chính | Raw Data Ingestion và Corruption/Repair |
+| Vai trò chính | Corruption/Repair |
 | Repository | [K3_Day10_Data-Pipeline-Data-Observability](https://github.com/pieupieu16/K3_Day10_Data-Pipeline-Data-Observability) |
 | Ngày hoàn thành | 2026-08-06 |
 
@@ -20,7 +20,7 @@
 
 | Module/deliverable | File/hàm phụ trách | Input | Output bàn giao | Trạng thái |
 | --- | --- | --- | --- | --- |
-| Crossref ingestion | `src/ingestion/crossref.py` | Crossref REST API và `Settings` | Raw response, raw records và danh sách `PaperRecord` | Hoàn thành |
+
 | Data corruption | `src/ingestion/corruption.py` — `corrupt_clean_dataframe()` | Clean baseline dataframe | Corrupted dataframe và corruption log | Hoàn thành |
 | Corruption/repair orchestration | `src/pipelines/corruption_flow.py` — `run_corruption_flow()` | Baseline artifacts, raw snapshot và test set | Corrupted/repaired data, index, answers, metrics và report | Hoàn thành |
 | Corruption verification | `tests/test_corruption.py`, `tests/test_corruption_report.py` | Dataframe/test metrics mẫu | Kiểm tra tính tái lập, validation và report delta | Hoàn thành |
@@ -40,19 +40,6 @@ Corruption flow là phần điều phối nên sử dụng các interface chung 
 
 ## 3. Kết quả theo vai trò
 
-### Raw data ingestion
-
-- Parse 24 bản ghi Crossref thành schema `PaperRecord` có stable `paper_id` từ DOI.
-- Làm sạch HTML/JATS tags trong abstract và chuẩn hóa ngày về `YYYY-MM-DD`.
-- Retry tối đa 5 lần với exponential backoff cho HTTP `429`, `500`, `502`, `503`, `504` và lỗi kết nối.
-- Lưu raw response trước khi parse để bảo đảm traceability và recovery.
-
-Artifact:
-
-```text
-data/raw/crossref_response.json
-data/raw/crossref_records.json
-```
 
 ### Corruption có kiểm soát
 
@@ -105,9 +92,6 @@ File repaired clean có cùng hash với clean baseline; repaired answers cũng 
 
 ## 4. Giải thích kỹ thuật
 
-### 4.1 Crossref ingestion
-
-Crossref là API công khai nên pipeline cần xử lý rate limit, lỗi server và dữ liệu không đồng nhất. `fetch_source_records()` tạo request từ `source_query`, `source_filter` và `max_results`, lưu payload thô, sau đó parse thành `PaperRecord`. Hàm `_clean_text()` loại markup và `_extract_date()` xử lý các trường ngày có thể chỉ chứa năm, năm-tháng hoặc đủ năm-tháng-ngày.
 
 ### 4.2 Corruption contract
 
@@ -241,5 +225,5 @@ data/reports/corruption_report.md
 - [x] Báo cáo ghi rõ giới hạn heuristic judge và Ragas chưa chạy.
 - [x] Không chứa `.env`, API key, token hoặc secret.
 
-**Họ và tên:** Trần Hải Quân  
+**Họ và tên:** Nguyễn Minh Phương  
 **Ngày xác nhận:** 2026-08-06
