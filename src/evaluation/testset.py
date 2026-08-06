@@ -1,76 +1,85 @@
-from __future__ import annotations
-
-from pathlib import Path
 from typing import Any
 
 import pandas as pd
 
-from core.utils import ensure_parent, write_json
+from core.utils import write_json
 
 
-def build_test_set(df: pd.DataFrame, output_path) -> list[dict[str, Any]]:
-    """Create a small evaluation set from the cleaned dataframe."""
-    if df is None or df.empty:
-        return []
+def build_test_set(df: pd.DataFrame, output_path=None) -> list[dict[str, Any]]:
+    """Build evaluation test set from cleaned dataframe containing questions for summary, authors, date, categories.
 
-    sample_df = df.head(min(6, len(df))).copy()
-    if len(sample_df) < 1:
-        return []
+    1. Check minimum number of documents.
+    2. Select representative papers from df.
+    3. Generate 4 question types per paper: summary, authors, date, categories.
+    4. Format entries with id, question_type, question, ground_truth, ground_truth_doc_ids.
+    5. Write JSON to output_path if provided.
+    """
+    if df.empty:
+        raise ValueError("Cannot build test set from an empty DataFrame.")
 
-    items: list[dict[str, Any]] = []
-    for idx, row in sample_df.iterrows():
-        paper_id = str(row["paper_id"])
-        title = str(row["title"])
-        authors = ", ".join(row["authors"]) if isinstance(row["authors"], list) else str(row["authors"])
-        categories = ", ".join(row["categories"]) if isinstance(row["categories"], list) else str(row["categories"])
-        published = str(row["published"])
+    test_samples: list[dict[str, Any]] = []
+    # Take representative papers (up to 10 papers)
+    selected_rows = df.head(10).to_dict(orient="records")
 
-        if idx == 0:
-            items.append(
-                {
-                    "id": f"{paper_id}-summary",
-                    "question_type": "summary",
-                    "question": f"What is the main contribution of the paper titled '{title}'?",
-                    "ground_truth": str(row["summary"]),
-                    "ground_truth_doc_ids": [paper_id],
-                }
-            )
+    sample_id = 1
+    for row in selected_rows:
+        paper_id = row["paper_id"]
+        title = row["title"]
+        summary = row["summary"]
+        authors = row["authors_joined"]
+        published = row["published"]
+        categories = row["categories_joined"]
 
-        items.append(
+        # 1. Summary Question
+        test_samples.append(
             {
-                "id": f"{paper_id}-authors",
+                "id": f"eval-{sample_id:03d}",
+                "question_type": "summary",
+                "question": f"What is the summary of the paper '{title}'?",
+                "ground_truth": summary,
+                "ground_truth_doc_ids": [paper_id],
+            }
+        )
+        sample_id += 1
+
+        # 2. Authors Question
+        test_samples.append(
+            {
+                "id": f"eval-{sample_id:03d}",
                 "question_type": "authors",
                 "question": f"Who are the authors of the paper '{title}'?",
                 "ground_truth": authors,
                 "ground_truth_doc_ids": [paper_id],
             }
         )
+        sample_id += 1
 
-        if published:
-            items.append(
-                {
-                    "id": f"{paper_id}-date",
-                    "question_type": "date",
-                    "question": f"When was the paper '{title}' published?",
-                    "ground_truth": published,
-                    "ground_truth_doc_ids": [paper_id],
-                }
-            )
+        # 3. Date Question
+        test_samples.append(
+            {
+                "id": f"eval-{sample_id:03d}",
+                "question_type": "date",
+                "question": f"When was the paper '{title}' published?",
+                "ground_truth": published,
+                "ground_truth_doc_ids": [paper_id],
+            }
+        )
+        sample_id += 1
 
-        if categories:
-            items.append(
-                {
-                    "id": f"{paper_id}-categories",
-                    "question_type": "categories",
-                    "question": f"Which categories describe the paper '{title}'?",
-                    "ground_truth": categories,
-                    "ground_truth_doc_ids": [paper_id],
-                }
-            )
+        # 4. Categories Question
+        test_samples.append(
+            {
+                "id": f"eval-{sample_id:03d}",
+                "question_type": "categories",
+                "question": f"What categories or subjects are associated with the paper '{title}'?",
+                "ground_truth": categories,
+                "ground_truth_doc_ids": [paper_id],
+            }
+        )
+        sample_id += 1
 
-    if output_path is not None:
-        output_path = Path(output_path)
-        ensure_parent(output_path)
-        write_json(output_path, items)
+    if output_path:
+        write_json(output_path, test_samples)
 
-    return items
+    return test_samples
+

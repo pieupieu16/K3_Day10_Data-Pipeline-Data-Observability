@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from datetime import datetime
 from pathlib import Path
 import re
@@ -7,7 +5,7 @@ from typing import Any
 
 import pandas as pd
 
-from core.utils import compact_join, normalize_whitespace
+from core.utils import normalize_whitespace
 from ingestion.crossref import PaperRecord
 
 
@@ -40,87 +38,106 @@ def _normalize_list(items: list[str] | None) -> list[str]:
 
 
 def build_clean_dataframe(records: list[PaperRecord], run_date: datetime) -> pd.DataFrame:
-    """Clean raw records into a dataframe ready for embedding and evaluation."""
-    rows: list[dict[str, Any]] = []
+    """Clean raw records into a normalized pandas DataFrame ready for embedding.
 
-    for record in records:
-        title = normalize_whitespace(record.title or "")
-        summary = normalize_whitespace(re.sub(r"^(abstract|ABSTRACT)[:\s]*", "", (record.summary or "")))
-        authors = _normalize_list(record.authors)
-        categories = _normalize_list(record.categories)
+    1. Normalize title, summary, authors, categories.
+    2. Parse published/updated date.
+    3. Calculate age_days relative to run_date.
+    4. Create helper columns:
+       - authors_joined
+       - categories_joined
+       - summary_chars
+       - text_for_embedding
+    5. Drop duplicates and filter bad/invalid rows.
+    6. Sort dataframe by published date descending and return.
+    """
+    rows: list[dict] = []
+    run_dt = run_date.date() if isinstance(run_date, datetime) else run_date
 
-        if not title or not summary:
+    for r in records:
+        title = normalize_whitespace(r.title or "")
+        summary = normalize_whitespace(r.summary or "")
+
+        # Filter invalid rows (empty title or summary under 20 chars)
+        if not title or not summary or len(summary) < 20:
             continue
 
-        published_dt = _parse_date(record.published)
-        updated_dt = _parse_date(record.updated) or published_dt
-        if published_dt is None and updated_dt is None:
-            continue
+        authors = [normalize_whitespace(a) for a in (r.authors or []) if a]
+        authors_joined = ", ".join(authors) if authors else "Unknown"
 
-        if published_dt is None:
-            published_dt = updated_dt
-        if updated_dt is None:
-            updated_dt = published_dt
+        categories = [normalize_whitespace(c) for c in (r.categories or []) if c]
+        categories_joined = ", ".join(categories) if categories else "General"
+        primary_category = r.primary_category or (categories[0] if categories else "General")
 
-        age_days = (run_date.date() - published_dt.date()).days if published_dt else None
-        if age_days is not None and age_days < 0:
-            age_days = 0
+        published_str = (r.published or "").strip()
+        updated_str = (r.updated or "").strip() or published_str
 
-        authors_joined = compact_join(authors, ", ")
-        categories_joined = compact_join(categories, ", ")
+        age_days = 0
+        if published_str:
+            try:
+                pub_date = datetime.strptime(published_str[:10], "%Y-%m-%d").date()
+                age_days = max(0, (run_dt - pub_date).days)
+            except Exception:
+                age_days = 0
 
-        text_for_embedding = " | ".join(
-            part for part in [title, summary, authors_joined, categories_joined] if part
+        summary_chars = len(summary)
+
+        text_for_embedding = normalize_whitespace(
+            f"Title: {title}\n"
+            f"Authors: {authors_joined}\n"
+            f"Categories: {categories_joined}\n"
+            f"Published: {published_str}\n"
+            f"Summary: {summary}"
         )
 
         rows.append(
             {
-                "paper_id": record.paper_id,
+                "paper_id": r.paper_id,
                 "title": title,
                 "summary": summary,
                 "authors": authors,
-                "categories": categories,
-                "primary_category": record.primary_category or (categories[0] if categories else ""),
-                "published": record.published,
-                "updated": record.updated,
-                "published_dt": published_dt,
-                "updated_dt": updated_dt,
-                "age_days": age_days,
                 "authors_joined": authors_joined,
+                "categories": categories,
                 "categories_joined": categories_joined,
-                "summary_chars": len(summary),
+                "primary_category": primary_category,
+                "published": published_str,
+                "updated": updated_str,
+                "age_days": age_days,
+                "summary_chars": summary_chars,
+                "abs_url": r.abs_url or f"https://doi.org/{r.paper_id}",
+                "pdf_url": r.pdf_url or r.abs_url or f"https://doi.org/{r.paper_id}",
+                "comment": r.comment or "",
                 "text_for_embedding": text_for_embedding,
-                "abs_url": record.abs_url,
-                "pdf_url": record.pdf_url,
-                "comment": record.comment,
             }
         )
 
     if not rows:
-        return pd.DataFrame(columns=[
-            "paper_id",
-            "title",
-            "summary",
-            "authors",
-            "categories",
-            "primary_category",
-            "published",
-            "updated",
-            "published_dt",
-            "updated_dt",
-            "age_days",
-            "authors_joined",
-            "categories_joined",
-            "summary_chars",
-            "text_for_embedding",
-            "abs_url",
-            "pdf_url",
-            "comment",
-        ])
+        return pd.DataFrame(
+            columns=[
+                "paper_id",
+                "title",
+                "summary",
+                "authors",
+                "authors_joined",
+                "categories",
+                "categories_joined",
+                "primary_category",
+                "published",
+                "updated",
+                "age_days",
+                "summary_chars",
+                "abs_url",
+                "pdf_url",
+                "comment",
+                "text_for_embedding",
+            ]
+        )
 
     df = pd.DataFrame(rows)
-    df = df.drop_duplicates(subset=["paper_id", "title"], keep="first").reset_index(drop=True)
-    df = df.sort_values(by=["published_dt", "paper_id"], ascending=[False, True], kind="mergesort").reset_index(drop=True)
-    df["authors"] = df["authors"].apply(lambda values: values if isinstance(values, list) else [])
-    df["categories"] = df["categories"].apply(lambda values: values if isinstance(values, list) else [])
+
+    df = df.drop_duplicates(subset=["paper_id"], keep="first")
+    df = df.drop_duplicates(subset=["title"], keep="first")
+    df = df.sort_values(by="published", ascending=False).reset_index(drop=True)
+
     return df
+
