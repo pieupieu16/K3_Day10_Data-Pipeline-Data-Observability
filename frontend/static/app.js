@@ -63,7 +63,8 @@ const App = (() => {
     "Luu y: pipeline chua implement se bao NotImplementedError - do la trang thai starter.";
 
   const teamText = () =>
-    "Quan  - crossref.py, cleaning.py, testset.py\n" +
+    "Quan  - crossref.py\n" +
+    "Duong  - cleaning.py, testset.py\n" +
     "Long  - quality.py, reporting.py\n" +
     "Phuong- corruption.py\n" +
     "Tung  - phase1.py, corruption_flow.py\n\n" +
@@ -539,7 +540,7 @@ const App = (() => {
       ? '<span class="led off"></span>Idle'
       : st.exit_code === 0
       ? '<span class="led on"></span>Hoan tat (0)'
-      : `<span class="led bad"></span>Loi (exit ${st.exit_code})`;
+      : `<span class="led bad"></span>Error (exit ${st.exit_code})`;
     $("#statusPipeline").textContent = st.pipeline
       ? `Pipeline: ${st.pipeline}${st.running ? " (running)" : ` (exit ${st.exit_code})`}`
       : "Pipeline: idle";
