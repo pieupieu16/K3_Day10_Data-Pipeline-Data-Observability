@@ -1,5 +1,15 @@
 # Phân công nhóm 5 người
 
+## Bảng thành viên
+
+| Tên | Mã học viên |
+| --- | --- |
+| Trần Hải Quân | 2A202601521 |
+| Nguyễn Thành Long | 2A202601443 |
+| Hoàng Hải Dương | 2A202601337 |
+| Nguyễn Minh Phương | 2A202601947 |
+| Đỗ Thanh Tùng | 2A202601205 |
+
 ## Quân – Lấy dữ liệu Crossref
 
 **File phụ trách:** `src/ingestion/crossref.py`
@@ -20,7 +30,7 @@ data/raw/crossref_records.json
 
 ---
 
-## Quân – Làm sạch dữ liệu và tạo test set
+## Dương – Làm sạch dữ liệu và tạo test set
 
 **File phụ trách:**
 
