@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import deque
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timedelta, timezone
 import hashlib
 import json
 import logging
@@ -128,7 +128,7 @@ class UrlDecision:
 
 
 def utc_now_iso() -> str:
-    return datetime.now(UTC).isoformat()
+    return datetime.now(timezone.utc).isoformat()
 
 
 def load_json(path: Path, default: Any) -> Any:
