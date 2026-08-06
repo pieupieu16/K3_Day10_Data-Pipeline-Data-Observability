@@ -1,9 +1,40 @@
 from datetime import datetime
+from pathlib import Path
+import re
+from typing import Any
 
 import pandas as pd
 
 from core.utils import normalize_whitespace
 from ingestion.crossref import PaperRecord
+
+
+def _parse_date(value: str) -> datetime | None:
+    if not value:
+        return None
+    value = value.strip()
+    if not value:
+        return None
+    for fmt in ("%Y-%m-%d", "%Y-%m", "%Y"):
+        try:
+            return datetime.strptime(value, fmt)
+        except ValueError:
+            continue
+    try:
+        return datetime.fromisoformat(value)
+    except ValueError:
+        return None
+
+
+def _normalize_list(items: list[str] | None) -> list[str]:
+    if not items:
+        return []
+    normalized: list[str] = []
+    for item in items:
+        cleaned = normalize_whitespace(str(item))
+        if cleaned:
+            normalized.append(cleaned)
+    return normalized
 
 
 def build_clean_dataframe(records: list[PaperRecord], run_date: datetime) -> pd.DataFrame:
