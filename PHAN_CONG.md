@@ -1,5 +1,15 @@
 # Phân công nhóm 5 người
 
+## Bảng thành viên
+
+| Tên | Mã học viên |
+| --- | --- |
+| Trần Hải Quân | 2A202601521 |
+| Nguyễn Thành Long | 2A202601443 |
+| Hoàng Hải Dương | 2A202601337 |
+| Nguyễn Minh Phương | 2A202601947 |
+| Đỗ Thanh Tùng | 2A202601205 |
+
 ## Quân – Lấy dữ liệu Crossref
 
 **File phụ trách:** `src/ingestion/crossref.py`
@@ -20,7 +30,7 @@ data/raw/crossref_records.json
 
 ---
 
-## Quân – Làm sạch dữ liệu và tạo test set
+## Dương – Làm sạch dữ liệu và tạo test set
 
 **File phụ trách:**
 
@@ -97,31 +107,37 @@ data/results/corruption_log.json
 
 ---
 
-## Tùng – Tích hợp và chạy toàn bộ pipeline
+## Tùng – Tích hợp pipeline và phát triển frontend
 
 **File phụ trách:**
 
 ```text
 src/pipelines/phase1.py
 src/pipelines/corruption_flow.py
+frontend/server.py
+frontend/static/index.html
+frontend/static/app.js
+frontend/static/style.css
 ```
 
 **Nhiệm vụ:**
 
-* Kết nối các module thành pipeline hoàn chỉnh.
-* Build embedding và ChromaDB.
-* Chạy RAG evaluation.
-* Sinh metrics cho baseline, corrupted và repaired.
+* Kết nối các module thành pipeline hoàn chỉnh cho baseline và corruption flow.
+* Build embedding và ChromaDB để tạo vector index cho hệ thống RAG.
+* Chạy RAG evaluation và sinh metrics cho baseline, corrupted và repaired.
 * Đảm bảo ba trạng thái dùng cùng test set và cấu hình.
-* Kiểm tra toàn bộ artifact trước khi nộp.
+* Xây dựng frontend console để theo dõi artifact, metrics, reports và chạy pipeline từ giao diện.
+* Hỗ trợ người dùng xem dữ liệu, chất lượng, đánh giá và log chạy pipeline.
 
 **Đầu ra:**
 
 ```text
+data/embeddings/papers_embeddings.json
 data/results/baseline_metrics.json
 data/results/corrupted_metrics.json
 data/results/repaired_metrics.json
 data/results/*_answers.json
+frontend/server.py
 ```
 
 ---
