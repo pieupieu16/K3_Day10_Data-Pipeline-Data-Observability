@@ -27,13 +27,15 @@ def _target_count(row_count: int, fraction: float = 0.15) -> int:
 
 
 def _embedding_text(row: pd.Series) -> str:
-    parts = (
-        f"Title: {normalize_whitespace(str(row.get('title', '')))}",
-        f"Summary: {normalize_whitespace(str(row.get('summary', '')))}",
-        f"Authors: {normalize_whitespace(str(row.get('authors_joined', '')))}",
-        f"Categories: {normalize_whitespace(str(row.get('categories_joined', '')))}",
+    # Keep the exact clean-data contract so untouched rows remain byte-for-byte
+    # comparable with the baseline after text_for_embedding is rebuilt.
+    return normalize_whitespace(
+        f"Title: {row.get('title', '')}\n"
+        f"Authors: {row.get('authors_joined', '')}\n"
+        f"Categories: {row.get('categories_joined', '')}\n"
+        f"Published: {row.get('published', '')}\n"
+        f"Summary: {row.get('summary', '')}"
     )
-    return "\n".join(parts)
 
 
 def _pick_indices(indices: list[int], count: int, rng: random.Random, offset: int) -> list[int]:

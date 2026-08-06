@@ -1,0 +1,27 @@
+{
+  "baseline_rows": 24,
+  "corrupted_rows": 22,
+  "row_delta": -2,
+  "baseline_unique_paper_ids": 24,
+  "corrupted_unique_paper_ids": 20,
+  "duplicate_rows_after_corruption": 4,
+  "blank_summaries_after_corruption": 3,
+  "noise_summaries_after_corruption": 3,
+  "stale_rows_after_corruption": 4,
+  "freshness_threshold_days": 180,
+  "event_counts": {
+    "drop_latest_records": 4,
+    "blank_summary": 3,
+    "summary_noise": 3,
+    "truncate_title": 3,
+    "stale_publication_date": 3,
+    "duplicate_rows": 2
+  },
+  "dropped_paper_ids": [
+    "10.2118/234689-pa",
+    "10.1007/s10278-026-02086-9",
+    "10.21203/rs.3.rs-10178277/v1",
+    "10.2196/preprints.106157"
+  ],
+  "seed": 42
+}
